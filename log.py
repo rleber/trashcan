@@ -5,27 +5,27 @@ from pathlib import Path
 import structlog
 import sys
 
-DEFAULT_LOG_DIRECTORY = "~/Library/Logs/amass_files/"
+DEFAULT_LOG_ROOT_DIRECTORY = "~/Library/Logs/"
 
 # Based on code from @dhruvshirar on medium.com, with thanks
 # https://medium.com/@dhruvshirar/structured-logging-in-python-a-practical-guide-for-production-systems-9659f461fa93
 # 
 def start_logging(
       log_level: str = "INFO", 
-      log_dir: Path | str = DEFAULT_LOG_DIRECTORY,
+      log_root_dir: Path | str = DEFAULT_LOG_ROOT_DIRECTORY,
       app: str = "app",
       copy_to_stdout: bool = False,
     ) -> None:
     """ Set up structured logging """
 
     # Create log directory
-    log_dir = Path(log_dir) # Ensure we are working with a Path object
-    expanded_log_dir = log_dir.expanduser()
-    expanded_log_dir.mkdir(parents=True, exist_ok=True)
+    log_root_dir = Path(log_root_dir) # Ensure we are working with a Path object
+    log_dir = log_root_dir.expanduser() / app
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     # Timestamped log filename - sorts chronologically
     log_file_name = Path(f"{app}_{datetime.now().strftime('%Y-%m-%d___%H-%M-%S')}.log")
-    log_file = expanded_log_dir / log_file_name
+    log_file = log_dir / log_file_name
 
     # File handler: 10MB max per file, keep 5 backups = 60MB total max
     file_handler = RotatingFileHandler(
@@ -48,7 +48,7 @@ def start_logging(
       stream_handler = logging.StreamHandler(sys.stdout)
       stream_handler.setFormatter(logging.Formatter('%(message)s'))
       root_logger.addHandler(stream_handler)
-      
+
     # Configure structlog
     structlog.configure(
         processors=[
