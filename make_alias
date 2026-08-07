@@ -1,5 +1,9 @@
 #!/usr/bin/osascript
 -- make_alias: Create a Finder alias to a file
+
+-- TODO Wrap this in a shell script to silence unnecessary output
+-- TODO Clean up error messages
+
 on run argv
     -- Check that two arguments were passed
     if (count of argv) = 2 then
