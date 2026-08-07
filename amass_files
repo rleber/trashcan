@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+# Execute project.py
+
+python3 amass_files.py $@
