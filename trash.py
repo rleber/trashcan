@@ -1,7 +1,16 @@
-# A ReversibleTrashObject
+"""
+Trash:
+A reversible Trash object
+
+Trash works like the trash can in the operating system: Files moved to Trash
+(using Trash#trash()) disappear from the filesystem, but they can be gotten back.
+
+This __does not__ persist after the script ends: any files not restored by
+then are permanently deleted. This behavior can be avoided by running 
+Trash#restore_trash() before the program ends
+"""
 
 from datetime import datetime
-import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -9,13 +18,14 @@ import tempfile
 
 class Trash:
     def __init__(self):
+        """ Initialize a Trash object """
         # Create a secure temporary directory that manages its own cleanup
         self.trash_dir = tempfile.TemporaryDirectory()
         # Track original locations { temporary_path: original_path }
         self.history = {}
 
     def trash(self, file, verbose=False):
-        """Moves a file or folder to the temporary trash directory."""
+        """Move a file or folder to the trash """
         file_path = Path(file).resolve()
         if not file_path.exists():
             raise FileNotFoundError(f"{file_path} does not exist.")
@@ -38,6 +48,7 @@ class Trash:
             print(f"Moved to trash: {file_path.name}")
 
     def restore(self, file, verbose=False):
+        """ Restore a file or folder from the trash """
         if temp_path := self.history.get(file):
             original_path = Path(file)
             if temp_path.exists():
@@ -55,10 +66,12 @@ class Trash:
             raise ValueError(f"File {file} was not placed in the trash.")
 
     def restore_all(self, verbose=False):
+        """ Restore all the files in the trash """
         for trashed_file in self.history:
             self.restore(trashed_file, verbose=verbose)
 
     def permanently_delete(self, file, verbose=False, strict=True):
+        """ Permanently delete a file from the trash """
         if temp_path := self.history.get(file):
             if temp_path.exists():
                 temp_path.unlink()
@@ -101,14 +114,32 @@ class Trash:
                 )
 
     def permanently_delete_all(self, verbose=False, strict=True):
-        """Purges the temporary directory entirely from the disk."""
+        """ Permanently delete all the files in the trash """
         for trashed_file in self.history:
             self.permanently_delete(trashed_file, verbose=verbose, strict=strict)
+        self.purge()
+        if verbose:
+            print("All trash contents permanently deleted.")
 
+    def purge(self, verbose=False):
+        """ 
+        Clean out the trash
+        Be careful: This results in the permanent deletion of all files in the trash
+        """
         self.trash_dir.cleanup()
         self.history.clear()
         if verbose:
-            print("Trash purged completely.")
+            print("Trash purged.")
 
-    def empty_trash(self, verbose=verbose, strict=True):
-        self.permanently_delete_all(verbose=verbose, strict=strict)
+    # TODO Ask the user for verification?
+    def empty_trash(self, verbose=False, strict=True):
+        """ Synonym: Empty the trash can """
+        self.permanently_delete_all(verbose=False, strict=strict)
+        if verbose:
+            print("Trash has been emptied.")
+
+    def restore_trash(self, verbose=False):
+        self.restore_all(verbose=False)
+        self.purge()
+        if verbose:
+            print("All files in trash restored.")
