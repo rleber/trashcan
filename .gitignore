@@ -221,7 +221,8 @@ __marimo__/
 
 # Project specific files
 # Ignore everything in the target directory
-data/*
+logs/*
 
-# Do not ignore the .keep file
-!data/.keep
+# Do not ignore the .gitkeep file
+!logs/.gitkeep
+
