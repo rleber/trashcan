@@ -222,7 +222,10 @@ __marimo__/
 # Project specific files
 # Ignore everything in the target directory
 logs/*
+test/*
 
 # Do not ignore the .gitkeep file
 !logs/.gitkeep
+!test/repo/.gitkeep
+!test/test/.gitkeep
 
