@@ -226,6 +226,9 @@ test/*
 
 # Do not ignore the .gitkeep file
 !logs/.gitkeep
+!test/.gitkeep
+!test/repo
 !test/repo/.gitkeep
+!test/test
 !test/test/.gitkeep
 
