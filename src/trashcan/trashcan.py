@@ -10,6 +10,8 @@ then are permanently deleted. This behavior can be avoided by running
 Trash#restore_trash() before the program ends
 """
 
+# TODO remove debugging code
+
 import shutil
 import tempfile
 from datetime import UTC, datetime
