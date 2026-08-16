@@ -4,4 +4,4 @@ __version__ = "0.0.1"
 
 # TODO Modify as needed
 
-from .trashcan import main_cli, main_gui
+from .trashcan import Trash

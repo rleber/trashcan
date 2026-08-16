@@ -11,7 +11,7 @@ from trashcan import Trash
 
 
 @pytest.fixture(autouse=True)
-def run_around_tests():
+def set_up_and_tear_down_data_directory():
     parent_dir = Path(__file__).parent
     # Create the tests/data directory
     data_path = parent_dir / "data"
