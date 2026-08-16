@@ -27,7 +27,7 @@ def readfile(path: str) -> list[str]:
     return lines
 
 
-def test_trash():
+def test_trash_and_restore_file():
     # Create trashcan
     can = Trash(verbose=True, debug=True)
 
@@ -49,3 +49,34 @@ def test_trash():
 
     # Read it back to ensure it's intact
     assert readfile(test_data_file) == ["bar"]
+
+
+# def test_trash_and_restore_folder():
+
+# def test_trash_and_restore_file_in_subfolder():
+
+# def test_restore_all():
+
+# def test_permanently_delete():
+
+# def test_permanently_delete_all():
+
+# def test_purge():
+
+# def test_empty_trash():
+
+# def test_restore_trash():
+
+# def test_deletions_are_permanent_after_program_exits():
+
+# def test_restored_files_remain_after_program_exits():
+
+# def test_error_missing_file():
+
+# def test_error_restore_file_not_trashed():
+
+# def test_error_restore_file_trashcan_missing():
+
+# def test_error_restore_collision():
+
+# def test_errors_trash_collision():
