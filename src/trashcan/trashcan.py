@@ -12,6 +12,8 @@ Trash#restore_trash() before the program ends
 """
 
 # TODO remove debugging code
+# TODO remove verbose mode
+# TODO remove non-strict mode
 
 import shutil
 import tempfile
@@ -106,6 +108,12 @@ class Trash:
                 f"Cannot trash {trash_element.absolute_file}. It does not exist."
             )
 
+        if self._history.get(trash_element.key):
+            # A file with this path has already been sent to the trash
+            raise FileExistsError(
+                f"Cannot trash {trash_element.absolute_file}. There is a file with the same path in the Trashcan already."
+            )
+
         # Log the transaction for potential rollback
         self._history[trash_element.key] = trash_element
         if debug:
@@ -148,6 +156,11 @@ class Trash:
 
         if element := self._history.get(file_path_name):
             if element.cache.exists():
+                # Check to ensure that restoring the file isn't going to clobber another one
+                if element.absolute_file.exists():
+                    raise FileExistsError(
+                        f"Can't restore {element.absolute_file}. That file already exists."
+                    )
                 # Ensure the parent directory still exists
                 element.absolute_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(element.cache, element.absolute_file)
