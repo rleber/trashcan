@@ -446,16 +446,110 @@ def test_purge():
     )
 
 
+def test_error_restore_file_not_trashed():
+    # Create trashcan
+    can = Trash(verbose=True, debug=True)
+    assert can.contents() == []
+
+    # Create a file
+    test_data_file = "tests/data/foo.txt"
+    test_data_path = Path(test_data_file)
+    test_data_file_contents = ["bar"]
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Attempt to restore the file (which was never deleted)
+    with pytest.raises(FileNotFoundError):
+        can.restore(test_data_path)
+
+
+def test_error_restore_collision():
+    # Create trashcan
+    can = Trash(verbose=True, debug=True)
+    assert can.contents() == []
+
+    # Create a file
+    test_data_file = "tests/data/foo.txt"
+    test_data_path = Path(test_data_file)
+    test_data_file_contents = ["bar"]
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Temporarily delete the file
+    can.trash(test_data_path)  # Delete a file
+    assert not test_data_path.exists()
+
+    # Create the file again
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Attempt to restore the deleted file, which has been recreated
+    with pytest.raises(FileExistsError):
+        can.restore(test_data_path)
+
+
+def test_error_trash_collision():
+    # Create trashcan
+    can = Trash(verbose=True, debug=True)
+    assert can.contents() == []
+
+    # Create a file
+    test_data_file = "tests/data/foo.txt"
+    test_data_path = Path(test_data_file)
+    test_data_file_contents = ["bar"]
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Temporarily delete the file
+    can.trash(test_data_path)  # Delete a file
+    assert not test_data_path.exists()
+
+    # Create the file again
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Attempt to trash it again
+    with pytest.raises(FileExistsError):
+        can.trash(test_data_path)
+
+
+def test_error_trash_nonexistent_file():
+    # Create trashcan
+    can = Trash(verbose=True, debug=True)
+    assert can.contents() == []
+
+    # Create a file
+    test_data_file = "tests/data/foo.txt"
+    test_data_path = Path(test_data_file)
+    test_data_file_contents = ["bar"]
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Attempt to temporarily delete a non-existent file
+    non_existent_test_data_file = "tests/data/foo2.txt"
+    non_existent_test_data_path = Path(non_existent_test_data_file)
+    with pytest.raises(FileNotFoundError):
+        can.trash(non_existent_test_data_path)
+
+
+def test_error_restore_file_not_in_trash():
+    # Create trashcan
+    can = Trash(verbose=True, debug=True)
+    assert can.contents() == []
+
+    # Create a file
+    test_data_file = "tests/data/foo.txt"
+    test_data_path = Path(test_data_file)
+    test_data_file_contents = ["bar"]
+    ensurefile(test_data_file, test_data_file_contents)
+
+    # Temporarily delete the file
+    can.trash(test_data_path)  # Delete a file
+    assert not test_data_path.exists()
+
+    # Attempt to restore a non-existent file
+    non_existent_test_data_file = "tests/data/foo2.txt"
+    non_existent_test_data_path = Path(non_existent_test_data_file)
+    with pytest.raises(FileNotFoundError):
+        can.restore(non_existent_test_data_path)
+
+
+# TODO def test_error_restore_file_cache_missing():
+
 # TODO def test_deletions_are_permanent_after_program_exits():
 
 # TODO def test_restored_files_remain_after_program_exits():
-
-# TODO def test_error_missing_file():
-
-# TODO def test_error_restore_file_not_trashed():
-
-# TODO def test_error_restore_file_trashcan_missing():
-
-# TODO def test_error_restore_collision():
-
-# TODO def test_error_trash_collision():
