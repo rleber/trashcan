@@ -11,10 +11,6 @@ then are permanently deleted. This behavior can be avoided by running
 Trash#restore_trash() before the program ends
 """
 
-# TODO remove debugging code
-# TODO remove verbose mode
-# TODO remove non-strict mode
-
 import shutil
 import tempfile
 from datetime import UTC, datetime
@@ -30,22 +26,12 @@ class Trash:
         time: datetime
         cache: Path
 
-    def __init__(self, verbose=False, debug=False):
+    def __init__(self):
         """Initialize a Trash object"""
         # Create a secure temporary directory that manages its own cleanup
         self.trash_dir = tempfile.TemporaryDirectory()
         # Track original locations { temporary_path: original_path }
-        self._verbose = verbose
-        self._debug = debug
         self._history = {}
-
-    @property
-    def verbose(self):
-        return self._verbose
-
-    @property
-    def debug(self):
-        return self._debug
 
     @property
     def history(self):
@@ -92,16 +78,11 @@ class Trash:
         )
         return trash_element
 
-    def trash(self, file, verbose=None, debug=None):
+    def trash(self, file):
         """
         Move a file or folder to the trash
         (delete it, but so that it can be restored later)
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         trash_element = self.trash_element_for(file)
         if not trash_element.absolute_file.exists():
             raise FileNotFoundError(
@@ -116,43 +97,16 @@ class Trash:
 
         # Log the transaction for potential rollback
         self._history[trash_element.key] = trash_element
-        if debug:
-            print(f"In trash(). file stored to history. self._history: {self._history}")
 
         # Move the file/directory to the temporary location
-        if debug:
-            print(f"In trash(). Moving {trash_element.key} to {trash_element.cache}")
         shutil.move(trash_element.key, trash_element.cache)
 
-        if verbose:
-            print(f"Moved to trash: {trash_element.absolute_file}")
-
-    def restore(self, file, verbose=None, debug=None):
+    def restore(self, file):
         """
         Restore a file or folder from the trash
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         file_path = self.absolute_path_for(file)
         file_path_name = str(file_path)
-        if debug:
-            print(f"In restore().       file_path_name: {file_path_name!r}")
-            if len(self._history) > 0:
-                print(
-                    f"In restore(). first key in history: {next(iter(self._history.keys()))!r}"
-                )
-                print(f"In restore().  self._history: {self._history}")
-                print(
-                    f"In restore().  self._history.get(file_path): {self._history.get(file_path_name)}"
-                )
-                print(
-                    f"In restore(). file path found?: {file_path_name == next(iter(self._history.keys()))}"
-                )
-            else:
-                print("In restore(). history is empty")
 
         if element := self._history.get(file_path_name):
             if element.cache.exists():
@@ -165,8 +119,6 @@ class Trash:
                 element.absolute_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(element.cache, element.absolute_file)
                 del self.history[element.key]
-                if verbose:
-                    print(f"Restored: {element.absolute_file}")
             else:
                 raise RuntimeError(  # This should not happen
                     f"Trashed file for {file} ({element.cache}) is missing."
@@ -174,90 +126,41 @@ class Trash:
         else:
             raise FileNotFoundError(f"File {file} is not in the trash.")
 
-    def restore_all(self, verbose=None, debug=None):
+    def restore_all(self):
         """
         Restore all the files and folders in the trash
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         for trashed_file in list(self.history.keys()).copy():
-            self.restore(trashed_file, verbose=verbose)
+            self.restore(trashed_file)
 
-    def permanently_delete(self, file, verbose=None, debug=None, strict=True):
+    def permanently_delete(self, file):
         """
         Permanently delete a file or folder from the trash
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         key = self.trash_key_for(file)
-        if element := self.history.get(key):
-            if element.cache.exists():
-                element.cache.unlink()
-                del self.history[key]
-                if verbose:
-                    print(f"Permanently deleted: {file}")
-            else:
-                if strict:
-                    raise RuntimeError(  # This should not happen
-                        f"Trashed file for {file} ({element.cache}) is missing."
-                    )
-                if Path(file).exists():
-                    Path(file).unlink()
-                    if verbose:
-                        print(f"Permanently deleted {file}. It was not in the trash")
-                else:
-                    if verbose:
-                        print(
-                            f"Did not permanently delete {file}, but it is gone. (It was not in the trash.)"
-                        )
-        else:
-            if strict:
-                raise FileNotFoundError(f"File {file} was never placed in the trash.")
-            elif Path(file).exists():
-                Path(file).unlink()
-                if verbose:
-                    print(
-                        f"Permanently deleted {file}, which was never sent to the trash"
-                    )
-            else:
-                if verbose:
-                    print(
-                        f"Did not permanently delete {file}, but it is gone. (It was never sent to the trash.)"
-                    )
+        element = self.history.get(key)
+        if not element:
+            raise FileNotFoundError(f"File {file} was never placed in the trash.")
+        if not element.cache.exists():
+            raise RuntimeError(  # This should not happen
+                f"Trashed file for {file} ({element.cache}) is missing."
+            )
+        element.cache.unlink()
+        del self.history[key]
 
-    def permanently_delete_all(self, verbose=None, debug=None, strict=True):
+    def permanently_delete_all(self):
         """
         Permanently delete all the files and folders in the trash
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         for element in self.history.copy().values():
-            self.permanently_delete(element.file, verbose=verbose, strict=strict)
+            self.permanently_delete(element.file)
         self.purge()
-        if verbose:
-            print("All trash contents permanently deleted.")
 
-    def purge(self, verbose=None, debug=None):
+    def purge(self):
         """
         Clean out the trash
         Be careful: This results in the permanent deletion of all files
         and folders in the trash
         """
-        if verbose is None:
-            verbose = self.verbose
-        if debug is None:
-            debug = self.debug
-
         self.trash_dir.cleanup()
         self.history.clear()
-        if verbose:
-            print("Trash purged.")

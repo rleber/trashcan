@@ -61,7 +61,7 @@ def verify_dir_contents(
 
 def test_trash_and_restore_file():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -86,7 +86,7 @@ def test_trash_and_restore_file():
 
 def test_trash_and_restore_path():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -111,7 +111,7 @@ def test_trash_and_restore_path():
 
 def test_trash_and_restore_empty_folder():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
 
     # Create a folder
     test_dir = Path("tests/data/dir_bar")
@@ -129,7 +129,7 @@ def test_trash_and_restore_empty_folder():
 
 def test_trash_and_restore_nonempty_folder():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
 
     # Create a folder
     test_dir = Path("tests/data/dir_bar")
@@ -167,7 +167,7 @@ def test_trash_and_restore_nonempty_folder():
 
 def test_trash_and_restore_file_in_subfolder():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
 
     # Create a folder
     test_dir = Path("tests/data/dir_bar")
@@ -213,7 +213,7 @@ def test_trash_and_restore_file_in_subfolder():
 
 def test_restore_all():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
 
     # Create a folder
     test_dir = Path("tests/data/dir_bar")
@@ -258,7 +258,7 @@ def test_restore_all():
 
 def test_permanently_delete():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a folder
@@ -320,7 +320,7 @@ def test_permanently_delete():
 
 def test_permanently_delete_all():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a folder
@@ -384,7 +384,7 @@ def test_permanently_delete_all():
 
 def test_purge():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a folder
@@ -448,7 +448,7 @@ def test_purge():
 
 def test_error_restore_file_not_trashed():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -464,7 +464,7 @@ def test_error_restore_file_not_trashed():
 
 def test_error_restore_collision():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -487,7 +487,7 @@ def test_error_restore_collision():
 
 def test_error_trash_collision():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -510,7 +510,7 @@ def test_error_trash_collision():
 
 def test_error_trash_nonexistent_file():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
@@ -528,7 +528,7 @@ def test_error_trash_nonexistent_file():
 
 def test_error_restore_file_not_in_trash():
     # Create trashcan
-    can = Trash(verbose=True, debug=True)
+    can = Trash()
     assert can.contents() == []
 
     # Create a file
